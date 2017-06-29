@@ -1,0 +1,174 @@
+---
+title: "Pratical ML-Final Project"
+author: "Christian Lopez"
+date: "June 27, 2017"
+output:
+  pdf_document: default
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set( cache = T)
+setwd("C:/Users/Christian/Desktop/Practical Machine L in R")
+
+```
+#Project Introduction
+
+##Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+##Data
+
+The training data for this project are available here: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment.
+
+##Goal
+
+The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.
+
+#Reproducibility
+
+Make sure to load the necessary packages and set.seed to 33883
+```{r}
+
+library(caret)
+library(ggplot2)
+library(rpart)
+library(randomForest)
+library(e1071)
+
+set.seed(33883)
+
+data<-read.csv( "pml-training.csv",na.strings=c("#DIV/0!", " ", "<NA>" ))
+validation<-read.csv("pml-testing.csv",na.strings=c("#DIV/0!", "", "<NA>" ) )
+
+
+```
+
+#Cleaning the data
+
+For this analysis the raw data is used. That is, none of the features calculated from the sensors data is used since the goal is to accurately classify if a person is correctly performing the activity given this one instance of this raw data and not the complete time series. This is done by lookin at the Na values of the colums. The variables use are as shown bellow:
+```{r}
+
+data<-data[,-1]
+nacol<-NULL
+for( j in 7:158){
+  summa<-summary(data[,j])
+  if(sum(grepl("NA", names(summa)))!=0){nacol<-c(nacol,j)}else{}
+  data[,j]<-as.numeric(data[,j])
+}
+nacol<-c(nacol, 1:6)
+#data2<-data[sample(c(1:nrow(data)), 500),-nacol]
+data2<-data[,-nacol]
+
+validation<-validation[,-1]
+nacol<-NULL
+for( j in 7:158){
+  summa<-summary(validation[,j])
+  if(sum(grepl("NA", names(summa)))!=0){nacol<-c(nacol,j)}else{}
+   validation[,j]<-as.numeric(validation[,j])
+}
+nacol<-c(nacol, 1:6)
+validation<-validation[,-nacol]
+```
+
+```{r}
+#Names of the raw data values used (predictor variables):
+names(data2)
+```
+
+These variables have different scale and variance, as shown in the box plots bellow. Hence, a scale and normalization is applied  to the training data set, which will be also use in the testing and validation data set. 
+```{r}
+#Subset the variables that are numeric in nature
+boxplotdata<-data2[, -53]
+boxplot(boxplotdata, names=c(1:52), main="Raw Data")
+
+
+#Center and Scale all varialbes (not class) == Standardizing
+preObj<-preProcess(data2[,-53], method = c("center", "scale"))
+preObjData<-predict(preObj,data2[,-53])
+boxplot(preObjData, names=c(1:52), main="Normalized data" )
+
+data2<-with(data2,(cbind(preObjData, classe)))
+
+preObjDataV<-predict(preObj,validation[,-53])
+validation<-(preObjDataV)
+```
+
+#Model Building
+
+We test multiple classification algorithms via a 10-fold Cross-validation approach.
+
+Due to computational limitation we only test a Random Forest (rf), Stochastic Gradient Boosting (gbm), and Support Vector Machine (svmLinear) classification algorithm.
+
+
+##Random Forest (rf)
+###10-fold CV
+```{r}
+# Set training control
+control <- trainControl(method="cv", number=10)
+ 
+# train the model with Random Forest
+model_rf <- train(classe~., data=data2, trControl=control, method="rf", verbose=F)
+
+# summarize results
+accuracy_rf<-confusionMatrix(predict(model_rf,data2), data2$classe)$overall[1]
+pred_rf<-predict(model_rf,validation)
+
+print(model_rf)
+print(model_rf$finalModel)
+plot(model_rf)
+```
+
+##Stochastic Gradient Boosting (gbm)
+###10-fold CV
+```{r}
+
+# train the model with Stochastic Gradient Boosting
+model_gbm <- train(classe~., data=data2, trControl=control, method="gbm", verbose=F)
+# summarize results
+accuracy_gbm<-confusionMatrix(predict(model_gbm,data2), data2$classe)$overall[1]
+pred_gbm<-predict(model_gbm,validation)
+
+print(model_gbm)
+print(model_gbm$finalModel)
+plot(model_gbm)
+```
+
+##Support Vector Machine (svmLinear)
+###10-fold CV
+```{r}
+# train the model with Generalized Linear Model
+model_svm <- train(classe~., data=data2, trControl=control, method="svmLinear", verbose=F)
+# summarize results
+accuracy_svm<-confusionMatrix(predict(model_svm,data2), data2$classe)$overall[1]
+pred_svm<-predict(model_svm,validation)
+
+print(model_svm)
+print(model_svm$finalModel)
+
+
+```
+
+#New Predictions
+These model prediction of the validation set are: 
+```{r}
+predictionMatrix<-as.data.frame(matrix(0,4,20))
+rownames(predictionMatrix)<-c("pred_rf", "pred_gbm", "pred_svm", "Majority Vote")
+colnames(predictionMatrix)<-c(1:20)
+predictionMatrix[1,]<-pred_rf
+predictionMatrix[2,]<-pred_gbm
+predictionMatrix[3,]<-pred_svm
+
+for(j in 1:20){
+predictionMatrix[4,j]<-names(sort(table(predictionMatrix[,j]),decreasing=TRUE)[1])
+}
+print(predictionMatrix)
+```
+
+
