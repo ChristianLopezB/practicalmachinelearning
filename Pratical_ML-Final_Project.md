@@ -3,13 +3,13 @@ Christian Lopez
 June 27, 2017  
 
 
-#Project Introduction
+# Project Introduction
 
-##Background
+## Background
 
 Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
 
-##Data
+## Data
 
 The training data for this project are available here: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
 
@@ -17,11 +17,11 @@ The test data are available here: https://d396qusza40orc.cloudfront.net/predmach
 
 The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. If you use the document you create for this class for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of assignment.
 
-##Goal
+## Goal
 
 The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.
 
-#Reproducibility
+# Reproducibility
 
 Make sure to load the necessary packages and set.seed to 33883
 
@@ -38,7 +38,7 @@ data<-read.csv( "pml-training.csv",na.strings=c("#DIV/0!", " ", "<NA>" ))
 validation<-read.csv("pml-testing.csv",na.strings=c("#DIV/0!", "", "<NA>" ) )
 ```
 
-#Cleaning the data
+# Cleaning the data
 
 For this analysis the raw data is used. That is, none of the features calculated from the sensors data is used since the goal is to accurately classify if a person is correctly performing the activity given this one instance of this raw data and not the complete time series. This is done by lookin at the Na values of the colums. The variables use are as shown bellow:
 
@@ -118,15 +118,15 @@ preObjDataV<-predict(preObj,validation[,-53])
 validation<-(preObjDataV)
 ```
 
-#Model Building
+# Model Building
 
 We test multiple classification algorithms via a 10-fold Cross-validation approach.
 
 Due to computational limitation we only test a Random Forest (rf), Stochastic Gradient Boosting (gbm), and Support Vector Machine (svmLinear) classification algorithm.
 
 
-##Random Forest (rf)
-###10-fold CV
+## Random Forest (rf)
+### 10-fold CV
 
 ```r
 # Set training control
@@ -191,8 +191,8 @@ plot(model_rf)
 
 ![](Pratical_ML-Final_Project_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
-##Stochastic Gradient Boosting (gbm)
-###10-fold CV
+## Stochastic Gradient Boosting (gbm)
+### 10-fold CV
 
 ```r
 # train the model with Stochastic Gradient Boosting
@@ -251,8 +251,8 @@ plot(model_gbm)
 
 ![](Pratical_ML-Final_Project_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
-##Support Vector Machine (svmLinear)
-###10-fold CV
+## Support Vector Machine (svmLinear)
+### 10-fold CV
 
 ```r
 # train the model with Generalized Linear Model
@@ -300,8 +300,8 @@ print(model_svm$finalModel)
 ## Training error : 0.207216
 ```
 
-#New Predictions
-These model prediction of the validation set are: 
+# New Predictions
+These models predictions of the final test set are: 
 
 ```r
 predictionMatrix<-as.data.frame(matrix(0,4,20))
