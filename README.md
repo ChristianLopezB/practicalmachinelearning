@@ -162,7 +162,7 @@ print(model_rf)
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 2.
 ```
-
+## Random Forest (rf) 10-fold CV Out-of-sample error estimate 0.05%
 ```r
 print(model_rf$finalModel)
 ```
@@ -234,7 +234,7 @@ print(model_gbm)
 ## The final values used for the model were n.trees = 150,
 ##  interaction.depth = 3, shrinkage = 0.1 and n.minobsinnode = 10.
 ```
-
+## Stochastic Gradient Boosting (gbm) 10-fold CV Out-of-sample error estimate 0.36%
 ```r
 print(model_gbm$finalModel)
 ```
@@ -282,6 +282,8 @@ print(model_svm)
 ## Tuning parameter 'C' was held constant at a value of 1
 ```
 
+## Support Vector Machine (svmLinear) 10-fold CV Out-of-sample error estimate 22%
+This is significnatly worse than the other two methods
 ```r
 print(model_svm$finalModel)
 ```
