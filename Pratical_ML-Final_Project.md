@@ -324,5 +324,6 @@ print(predictionMatrix)
 ## pred_svm      C A B C A E D B A  A  C  A  B  A  E  E  A  B  B  B
 ## Majority Vote B A B A A E D B A  A  B  C  B  A  E  E  A  B  B  B
 ```
-
+##               1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+## Majority Vote B A B A A E D B A  A  B  C  B  A  E  E  A  B  B  B
 
